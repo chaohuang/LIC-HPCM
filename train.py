@@ -245,10 +245,10 @@ def parse_args(argv):
         "--save", action="store_true", default=True, help="Save model to disk"
     )
     parser.add_argument(
-        "--save_path", type=str, default="/output/", help="Where to Save model"
+        "--save_path", type=str, default="output/", help="Where to Save model"
     )
     parser.add_argument(
-        "--log_dir", type=str, default="/output/", help="Where to Save logs"
+        "--log_dir", type=str, default="output/", help="Where to Save logs"
     )
     parser.add_argument(
         "--seed", type=float, help="Set random seed for reproducibility"

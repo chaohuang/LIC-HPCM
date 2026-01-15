@@ -1,0 +1,5 @@
+.python-version
+nohup*
+data/
+output/
+__pycache__/
