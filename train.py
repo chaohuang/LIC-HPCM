@@ -315,10 +315,12 @@ def main(argv):
     print(net)
     net = net.to(device)
 
+    print(f"Batch size: {args.batch_size}")
+    bs_32 = args.batch_size / 32
     lr_scheduler = lambda x : \
-    1e-4 if x < 2750 else (
-        3e-5 if x < 2850 else (
-            1e-5 if x < 2950 else 1e-6
+    1e-4 if x < (2750 * bs_32) else (
+        3e-5 if x < (2850 * bs_32) else (
+            1e-5 if x < (2950 * bs_32) else 1e-6
         )
     )
 
