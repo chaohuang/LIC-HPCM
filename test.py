@@ -9,6 +9,7 @@ from typing import Dict, Any
 import torch.nn.functional as F
 from torchvision.transforms import ToTensor
 from pytorch_msssim import ms_ssim
+from collections import OrderedDict
        
 def pad(x, p=2 ** 6):
     h, w = x.size(2), x.size(3)
@@ -80,7 +81,7 @@ def get_scale_table(min, max, levels):
     return torch.exp(torch.linspace(math.log(min), math.log(max), levels))
 
 def test(args):
-    device = torch.device("cuda")
+    device = torch.device("cpu")
     ##### dataset
     images_list = glob.glob(f'{args.dataset}/*.png')
 
@@ -104,9 +105,19 @@ def test(args):
     for ckpt in args.checkpoint:
         print("Loading", ckpt)
         checkpoint = torch.load(ckpt, map_location=device)
+        if 'state_dict' in checkpoint:
+            checkpoint = checkpoint['state_dict']
+        elif 'model' in checkpoint:
+            checkpoint = checkpoint['model']
+        else:
+            print("Neither state_dict nor model is in checkpoint")
+        state_dict = OrderedDict()
+        for k, v in checkpoint.items():
+            name = k[7:] if k.startswith('module.') else k  # remove 'module.' prefix
+            state_dict[name] = v
         model = net()
         model.eval()
-        model.load_state_dict(checkpoint, strict=True)
+        model.load_state_dict(state_dict, strict=True)
         model.update(get_scale_table(0.12, 64, args.num))
         model = model.to(device)
 
@@ -128,18 +139,14 @@ def test(args):
             x_pad = pad(x, p)
             img_name = img_path.split('/')[-1]
             print(img_name)
-            torch.cuda.synchronize()
             enc_start = time.time()
             with torch.no_grad():
                 out_enc = model.compress(x_pad)
-            torch.cuda.synchronize()
             enc_t = time.time() - enc_start
             
-            torch.cuda.synchronize()
             dec_start = time.time()
             with torch.no_grad():
                 out_dec = model.decompress(out_enc["strings"], out_enc["shape"])
-            torch.cuda.synchronize()
             dec_t = time.time() - dec_start
             x_hat = crop(out_dec["x_hat"], (h,w))
 
