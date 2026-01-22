@@ -143,6 +143,7 @@ def train_one_epoch(
 
 
 def test_epoch(epoch, test_dataloader, model, criterion, writer):
+    t_start = time.time()
     model.eval()
     device = next(model.parameters()).device
 
@@ -165,6 +166,7 @@ def test_epoch(epoch, test_dataloader, model, criterion, writer):
             psnr.update(out_criterion["psnr"])
             y_bpp.update(out_criterion["y_bpp"])
             z_bpp.update(out_criterion["z_bpp"])
+    test_time = time.time() - t_start
     print(
         f"Test epoch {epoch}: Average losses:"
         f"\tLoss: {loss.avg:.4f} |"
@@ -173,6 +175,7 @@ def test_epoch(epoch, test_dataloader, model, criterion, writer):
         f"\tBpp loss: {bpp_loss.avg:.4f} |"
         f"\ty bpp: {y_bpp.avg:.4f} |"
         f"\tz bpp: {z_bpp.avg:.4f} |"
+        f'\t test time : {test_time:.2f} |'
     )
     writer.add_scalar("test_loss", loss.avg, global_step = epoch)
     writer.add_scalar("test_mse_loss", mse_loss.avg, global_step = epoch)
@@ -340,6 +343,7 @@ def main(argv):
     best_loss = float("inf")
     global_step = 0
     for epoch in range(last_epoch, args.epochs):
+        epoch_begin_time = time.time()
 
         lr = lr_scheduler(epoch)
         for param_group in optimizer.param_groups: 
@@ -358,6 +362,9 @@ def main(argv):
         )
 
         loss = test_epoch(epoch, test_dataloader, net, criterion, writer)
+
+        epoch_time = time.time() - epoch_begin_time
+        print(f"epoch time : {epoch_time:.2f}")
 
         is_best = loss < best_loss
         best_loss = min(loss, best_loss)

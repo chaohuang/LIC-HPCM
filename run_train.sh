@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=0
 python train.py \
 --model_name HPCM_Base \
 --train_dataset /data/chaohuang/hpcm/data/flicker2W \
