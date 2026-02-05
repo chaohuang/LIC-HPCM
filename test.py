@@ -117,7 +117,7 @@ def test(args):
             state_dict[name] = v
         model = net()
         model.eval()
-        model.load_state_dict(state_dict, strict=True)
+        model.load_state_dict(state_dict, strict=False)
         model.update(get_scale_table(0.12, 64, args.num))
         model = model.to(device)
 

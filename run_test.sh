@@ -1,4 +1,4 @@
 python test.py \
---model_name HPCM_Base \
+--model_name HPCM_Large \
 --dataset  data/kodak \
---checkpoint output/epoch_best.pth.tar
+--checkpoint output/HPCM_Large/0.0018.pth.tar
